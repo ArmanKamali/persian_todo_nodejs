@@ -1,18 +1,19 @@
 const Todo = require('../model/todo')
-const todoUtils = require('../utils/todos')
 
-exports.getIndex = (req, res) => {
-    todoUtils.getCompletedTodos(completedTodos => {
-        todoUtils.getRemainingTodos(remainingTodos => { 
-            Todo.fetchAll((todos) => {
-                res.render('index', {
-                    pageTitle: 'کارهای روزمره',
-                    todos,
-                    completedTodos,
-                    remainingTodos,
-                })
-            })
+
+exports.getIndex = async (req, res) => {
+    try {
+        const completedTodos = await Todo.count({ where: { completed: true } })
+        const todos = await Todo.findAll();
+        res.render('index', {
+            pageTitle: 'کارهای روزمره',
+            todos,
+            completedTodos,
+            remainingTodos: todos.length - completedTodos
         })
-    });
-
+    } catch (error) {
+        console.log(error)
+    }   
 }
+
+//* CRUD => Create, Read, Update, Delete

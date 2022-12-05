@@ -1,29 +1,28 @@
 const Todo = require('../model/todo')
-const todoUtils = require('../utils/todos')
-exports.addToto = (req, res) => {
+exports.addToto = async (req, res) => {
     if (!req.body.todo) return res.redirect('/');
-
-    const todo = new Todo(todoUtils.generateRandomid(), req.body.todo);
-    todo.save(err => {
-        console.log('e=', err)
-        if (!err) res.redirect('/')
-        else {
-            console.log(err)
-        }
-    })
+    try {
+        await Todo.create({ text: req.body.todo })
+        res.redirect('/')
+    } catch (err) { console.log('addtodo',err) }
 }
 
-exports.deleteTodo = (req, res) => {
-    Todo.deleteTodo(req.params.id, err => {
-        if (!err) res.redirect('/')
-        else console.log(err)
-    })
+exports.deleteTodo = async (req, res) => {
+    try {
+        await Todo.destroy({ where: { id: req.params.id } })
+        res.redirect('/')
+    } catch (error) {
+        console.log('delete',error)
+    }
 }
 
-exports.completeTodo = (req, res) => {
-    Todo.setTodoToComplete(req.params.id, err => {
-        if (!err) res.redirect('/')
-        else
-            console.log(err)
-    })
+exports.completeTodo = async (req, res) => {
+    try {
+        const todo = await Todo.findByPk(req.params.id);
+        todo.completed = true;
+        await todo.save();
+        res.redirect('/')
+    } catch (error) {
+        console.log('complete',error)
+    }
 }
